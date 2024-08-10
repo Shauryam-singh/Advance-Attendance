@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Generate QR Codes</title>
+</head>
+<body>
+    <h1>Generate QR Codes</h1>
+    <form method="post" action="/generate_qr_codes">
+        <label for="batch">Select Batch:</label>
+        <select id="batch" name="batch">
+            {% for b in batches %}
+                <option value="{{ b }}">{{ b }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Generate QR Codes">
+    </form>
+</body>
+</html>

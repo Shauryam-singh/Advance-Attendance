@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Attendance</title>
+</head>
+<body>
+    <h1>Attendance Records</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Timestamp</th>
+                <th>Subject</th>
+                <th>Batch</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in attendance %}
+                <tr>
+                    <td>{{ record['Student ID'] }}</td>
+                    <td>{{ record['Name'] }}</td>
+                    <td>{{ record['Timestamp'] }}</td>
+                    <td>{{ record['Subject'] }}</td>
+                    <td>{{ record['Batch'] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/">Back to Main</a>
+</body>
+</html>

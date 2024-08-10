@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mark Attendance</title>
+</head>
+<body>
+    <h1>Mark Attendance</h1>
+    <form method="post" action="/mark_attendance">
+        <label for="batch">Select Batch:</label>
+        <select id="batch" name="batch">
+            {% for b in batches %}
+                <option value="{{ b }}">{{ b }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Mark Attendance">
+    </form>
+</body>
+</html>
