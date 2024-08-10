@@ -2,41 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Timetable</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Manage Timetable</h1>
-
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul>
-          {% for message in messages %}
-            <li>{{ message }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
-
-    <form method="post">
-        <label for="batch">Select Batch:</label>
-        <select id="batch" name="batch">
-            {% for b in batches %}
-                <option value="{{ b }}">{{ b }}</option>
-            {% endfor %}
-        </select>
-        <br>
-        <label for="subject_name">Subject Name:</label>
-        <input type="text" id="subject_name" name="subject_name" required>
-        <br>
-        <label for="start_time">Start Time (e.g., 09:00 AM):</label>
-        <input type="text" id="start_time" name="start_time" required>
-        <br>
-        <label for="end_time">End Time (e.g., 10:00 AM):</label>
-        <input type="text" id="end_time" name="end_time" required>
-        <br>
-        <input type="submit" value="Add to Timetable">
-    </form>
-
-    <a href="{{ url_for('index') }}">Back to Home</a>
+    <header>
+        <h1>Manage Timetable</h1>
+    </header>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <h2>Add Timetable Entry</h2>
+        <form method="post">
+            <label for="batch">Batch:</label>
+            <select name="batch" id="batch">
+                {% for batch in batches %}
+                    <option value="{{ batch }}">{{ batch }}</option>
+                {% endfor %}
+            </select>
+            <label for="subject_name">Subject Name:</label>
+            <input type="text" name="subject_name" id="subject_name" required>
+            <label for="start_time">Start Time:</label>
+            <input type="text" name="start_time" id="start_time" required>
+            <label for="end_time">End Time:</label>
+            <input type="text" name="end_time" id="end_time" required>
+            <input type="submit" value="Add Timetable">
+        </form>
+        <a href="{{ url_for('index') }}">Back to Home</a>
+    </div>
 </body>
 </html>
