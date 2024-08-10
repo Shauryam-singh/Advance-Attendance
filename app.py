@@ -1,9 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
 import os
 import pandas as pd
 import qrcode
 import cv2
 import datetime
+from flask import Flask, render_template, request, redirect, url_for, flash
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -12,11 +12,13 @@ app.secret_key = 'your_secret_key'
 STUDENT_DATA_DIR = 'Students'
 TIMETABLE_DATA_DIR = 'Timetable'
 QR_CODE_DIR = 'QR'
+ATTENDANCE_DATA_DIR = 'attendance'
 
 # Ensure directories exist
 os.makedirs(STUDENT_DATA_DIR, exist_ok=True)
 os.makedirs(TIMETABLE_DATA_DIR, exist_ok=True)
 os.makedirs(QR_CODE_DIR, exist_ok=True)
+os.makedirs(ATTENDANCE_DATA_DIR, exist_ok=True)
 
 # Predefined list of batches
 BATCHES = ['CSE_CORE_H', 'ECE_CORE_A', 'MECH_CORE_B', 'EEE_CORE_C']
@@ -26,6 +28,9 @@ def get_student_data_file(batch):
 
 def get_timetable_file(batch):
     return os.path.join(TIMETABLE_DATA_DIR, f'timetable_{batch}.csv')
+
+def get_attendance_file(batch):
+    return os.path.join(ATTENDANCE_DATA_DIR, f'attendance_{batch}.csv')
 
 def generate_qr_code(student_id, name, batch):
     """Generate and save a QR code for a student."""
@@ -82,7 +87,6 @@ def mark_attendance():
         flash(f"No timetable found for batch {batch}.")
         return redirect(url_for('index'))
 
-    # Load students for the batch
     students_df = load_students(batch)
     if students_df.empty:
         flash(f"No students found for batch {batch}.")
@@ -94,7 +98,7 @@ def mark_attendance():
     attendance_df = read_qr_code(attendance_df, timetable_df, valid_ids, batch)
 
     # Save the attendance to a file
-    attendance_file = f"attendance_{batch}.csv"
+    attendance_file = get_attendance_file(batch)
     if not attendance_df.empty:
         attendance_df.to_csv(attendance_file, index=False)
         flash(f"Attendance data saved to {attendance_file}.")
