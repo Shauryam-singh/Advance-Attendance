@@ -115,7 +115,7 @@ def read_qr_code(attendance, timetable, valid_ids, batch):
     cap = cv2.VideoCapture(0)
     detector = cv2.QRCodeDetector()
 
-    TIME_WINDOW = 300
+    TIME_WINDOW = 1
 
     while True:
         _, frame = cap.read()
@@ -219,10 +219,9 @@ def periodically_generate_qr_codes(batch):
     students_df = load_students(batch)
     for _, student in students_df.iterrows():
         generate_qr_code(student['Student ID'], student['Name'], student['Batch'])
-    print(f"Periodically generated QR codes for batch {batch}.")
     
     # Schedule the next generation in the future
-    Timer(60 * 5, periodically_generate_qr_codes, [batch]).start()
+    Timer(1, periodically_generate_qr_codes, [batch]).start()
 
 # Call this function to start periodic QR code generation for each batch
 for batch in BATCHES:
