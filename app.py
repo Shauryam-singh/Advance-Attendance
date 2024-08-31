@@ -3,7 +3,9 @@ import pandas as pd
 import qrcode
 import cv2
 import datetime
+import time
 from flask import Flask, render_template, request, redirect, url_for, flash
+from threading import Timer
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -33,12 +35,13 @@ def get_attendance_file(batch):
     return os.path.join(ATTENDANCE_DATA_DIR, f'attendance_{batch}.csv')
 
 def generate_qr_code(student_id, name, batch):
-    """Generate and save a QR code for a student."""
-    qr_data = f"{student_id};{name};{batch}"
+    """Generate and save a time-stamped QR code for a student."""
+    timestamp = int(time.time()) 
+    qr_data = f"{student_id};{name};{batch};{timestamp}"
     qr = qrcode.make(qr_data)
     qr_path = os.path.join(QR_CODE_DIR, f"{name}_QR.png")
     qr.save(qr_path)
-    print(f"QR code for {name} generated at {qr_path}.")
+    print(f"Time-stamped QR code for {name} generated at {qr_path}.")
 
 def load_students(batch):
     file_path = get_student_data_file(batch)
@@ -112,6 +115,8 @@ def read_qr_code(attendance, timetable, valid_ids, batch):
     cap = cv2.VideoCapture(0)
     detector = cv2.QRCodeDetector()
 
+    TIME_WINDOW = 300
+
     while True:
         _, frame = cap.read()
         if frame is None:
@@ -121,25 +126,34 @@ def read_qr_code(attendance, timetable, valid_ids, batch):
         data, _, _ = detector.detectAndDecode(frame)
         if data:
             try:
-                student_id, name, qr_batch = data.split(';')
-                print(f"QR Code Data: Student ID={student_id}, Name={name}, Batch={qr_batch}")
-                if student_id in valid_ids and qr_batch == batch:
-                    now = datetime.datetime.now()
-                    timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
-                    subject, start_time, end_time = get_current_subject(now, timetable)
-                    if subject:
-                        new_entry = pd.DataFrame({
-                            "Student ID": [student_id],
-                            "Name": [name],
-                            "Timestamp": [timestamp],
-                            "Subject": [subject],
-                            "Batch": [batch]
-                        })
-                        attendance = pd.concat([attendance, new_entry], ignore_index=True)
-                        print(f"Marked attendance for {name} in {subject} at {timestamp}")
-                        cv2.waitKey(1000)
+                student_id, name, qr_batch, qr_timestamp = data.split(';')
+                qr_timestamp = int(qr_timestamp)
+                current_timestamp = int(time.time())
+                
+                # Check if the QR code is within the valid time window
+                if current_timestamp - qr_timestamp <= TIME_WINDOW:
+                    print(f"QR Code Data: Student ID={student_id}, Name={name}, Batch={qr_batch}")
+                    if student_id in valid_ids and qr_batch == batch:
+                        now = datetime.datetime.now()
+                        timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
+                        subject, start_time, end_time = get_current_subject(now, timetable)
+                        if subject:
+                            new_entry = pd.DataFrame({
+                                "Student ID": [student_id],
+                                "Name": [name],
+                                "Timestamp": [timestamp],
+                                "Subject": [subject],
+                                "Batch": [batch]
+                            })
+                            attendance = pd.concat([attendance, new_entry], ignore_index=True)
+                            print(f"Marked attendance for {name} in {subject} at {timestamp}")
+                            cv2.waitKey(1000)
+                        else:
+                            print(f"No lecture currently. Unable to mark attendance for {name} at {timestamp}")
                     else:
-                        print(f"No lecture currently. Unable to mark attendance for {name} at {timestamp}")
+                        print("Invalid batch or student ID.")
+                else:
+                    print("QR code is expired.")
             except ValueError:
                 print("Invalid QR code data format.")
 
@@ -200,6 +214,19 @@ def manage_timetable():
         return redirect(url_for('manage_timetable'))
 
     return render_template('manage_timetable.html', batches=BATCHES)
+
+def periodically_generate_qr_codes(batch):
+    students_df = load_students(batch)
+    for _, student in students_df.iterrows():
+        generate_qr_code(student['Student ID'], student['Name'], student['Batch'])
+    print(f"Periodically generated QR codes for batch {batch}.")
+    
+    # Schedule the next generation in the future
+    Timer(60 * 5, periodically_generate_qr_codes, [batch]).start()
+
+# Call this function to start periodic QR code generation for each batch
+for batch in BATCHES:
+    periodically_generate_qr_codes(batch)
 
 if __name__ == '__main__':
     app.run(debug=True)
