@@ -1,5 +1,6 @@
 Flask
 Pandas
+Pillow
 opencv-python
 opencv-python-headless==4.5.5.64
 qrcode
