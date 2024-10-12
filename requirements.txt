@@ -3,3 +3,4 @@ Pandas
 opencv-python
 qrcode
 gunicorn
+Pillow
