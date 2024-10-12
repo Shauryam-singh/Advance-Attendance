@@ -4,7 +4,7 @@ This project is a Flask-based web application that automates attendance manageme
 
 ## Features
 
-- **Time-Stamped QR Codes:** Each QR code contains a time-stamp to ensure the validity within a specified time window (e.g., 5 minutes).
+- **Time-Stamped QR Codes:** Each QR code contains a time-stamp to ensure the validity within a specified time window (e.g., 15 second).
 - **Automated Attendance:** Attendance is marked by scanning QR codes, which are validated based on the time-stamp and batch.
 - **Periodic QR Code Generation:** QR codes are automatically regenerated every 5 minutes, ensuring they remain valid.
 - **Batch Management:** Supports multiple batches, with separate data files for students, timetables, and attendance.
