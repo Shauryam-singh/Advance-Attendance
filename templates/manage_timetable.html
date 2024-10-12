@@ -34,7 +34,15 @@
             <input type="text" name="end_time" id="end_time" required>
             <input type="submit" value="Add Timetable">
         </form>
-        <a href="{{ url_for('index') }}">Back to Home</a>
+
+        <div class="links">
+            <a href="{{ url_for('index') }}" class="btn">Back to home</a>
+        </div>
+
     </div>
+
+    <footer>
+        <p>&copy; 2024 Attendance Management System. All rights reserved.</p>
+    </footer>
 </body>
 </html>

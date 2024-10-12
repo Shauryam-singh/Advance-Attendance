@@ -32,7 +32,15 @@
             <input type="text" name="student_name" id="student_name" required>
             <input type="submit" value="Add Student">
         </form>
-        <a href="{{ url_for('index') }}">Back to Home</a>
+
+        <div class="links">
+            <a href="{{ url_for('index') }}" class="btn">Back to home</a>
+        </div>
+
     </div>
+
+    <footer>
+        <p>&copy; 2024 Attendance Management System. All rights reserved.</p>
+    </footer>
 </body>
 </html>

@@ -3,42 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>Attendance Management System</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <header>
-        <h1>Attendance Management System</h1>
+        <div class="navbar">
+            <h1>Attendance Management System</h1>
+        </div>
     </header>
+
     <div class="container">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash {{ category }}">{{ message }}</div>
-                {% endfor %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
             {% endif %}
         {% endwith %}
-        <h2>Welcome</h2>
-        <form action="{{ url_for('generate_qr_codes') }}" method="get">
-            <label for="batch">Select Batch:</label>
-            <select name="batch" id="batch">
-                {% for batch in batches %}
-                    <option value="{{ batch }}">{{ batch }}</option>
-                {% endfor %}
-            </select>
-            <input type="submit" value="Generate QR Codes">
-        </form>
-        <form action="{{ url_for('mark_attendance') }}" method="get">
-            <label for="batch">Select Batch:</label>
-            <select name="batch" id="batch">
-                {% for batch in batches %}
-                    <option value="{{ batch }}">{{ batch }}</option>
-                {% endfor %}
-            </select>
-            <input type="submit" value="Mark Attendance">
-        </form>
-        <a href="{{ url_for('manage_students') }}">Manage Students</a>
-        <a href="{{ url_for('manage_timetable') }}">Manage Timetable</a>
+        
+        <div class="welcome-section">
+            <h2>Welcome to the Attendance Management System</h2>
+            <p>Select a batch to generate QR codes or mark attendance.</p>
+        </div>
+
+        <div class="actions">
+            <div class="action-card">
+                <h3>Generate QR Codes</h3>
+                <form action="{{ url_for('generate_qr_codes') }}" method="get">
+                    <label for="batch">Select Batch:</label>
+                    <select name="batch" id="batch">
+                        {% for batch in batches %}
+                            <option value="{{ batch }}">{{ batch }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="submit" value="Generate QR Codes">
+                </form>
+            </div>
+
+            <div class="action-card">
+                <h3>Mark Attendance</h3>
+                <form action="{{ url_for('mark_attendance') }}" method="get">
+                    <label for="batch">Select Batch:</label>
+                    <select name="batch" id="batch">
+                        {% for batch in batches %}
+                            <option value="{{ batch }}">{{ batch }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="submit" value="Mark Attendance">
+                </form>
+            </div>
+        </div>
+
+        <div class="links">
+            <a href="{{ url_for('manage_students') }}" class="btn">Manage Students</a>
+            <a href="{{ url_for('manage_timetable') }}" class="btn">Manage Timetable</a>
+            <a href="{{ url_for('show_qr_codes', batch='all') }}" class="btn">Show All QR Codes</a>
+        </div>
     </div>
+
+    <footer>
+        <p>&copy; 2024 Attendance Management System. All rights reserved.</p>
+    </footer>
 </body>
 </html>

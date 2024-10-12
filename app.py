@@ -13,7 +13,7 @@ app.secret_key = 'your_secret_key'
 # Directory paths
 STUDENT_DATA_DIR = 'Students'
 TIMETABLE_DATA_DIR = 'Timetable'
-QR_CODE_DIR = 'QR'
+QR_CODE_DIR = r'static\QR'
 ATTENDANCE_DATA_DIR = 'attendance'
 
 # Ensure directories exist
@@ -67,7 +67,7 @@ def generate_qr_codes():
     if not batch:
         flash('No batch selected for QR code generation.')
         return redirect(url_for('index'))
-    
+
     students_df = load_students(batch)
     if students_df.empty:
         flash(f"No students found for batch {batch}.")
@@ -110,13 +110,32 @@ def mark_attendance():
 
     return redirect(url_for('index'))
 
+@app.route('/show_qr_codes', methods=['GET'])
+def show_qr_codes():
+    # Use the full path to the QR code directory under 'static/QR/'
+    qr_code_dir = os.path.join(os.getcwd(), 'static', 'QR')  # Ensure using full path
+
+    # Debugging print statement
+    print(f"Looking in {qr_code_dir} for QR code files.")
+    
+    # List all QR codes in the directory
+    qr_files = [f for f in os.listdir(qr_code_dir) if f.endswith('.png')]
+
+    # Debugging print statement to check QR files found
+    print(f"Found QR files: {qr_files}")
+
+    if not qr_files:
+        flash('No QR codes found.')
+        return redirect(url_for('index'))
+
+    return render_template('show_qr_codes.html', qr_files=qr_files)
+
 def read_qr_code(attendance, timetable, valid_ids, batch):
     """Read QR codes from the webcam and mark attendance."""
     cap = cv2.VideoCapture(0)
     detector = cv2.QRCodeDetector()
 
-    TIME_WINDOW = 60
-
+    TIME_WINDOW = 300
     while True:
         _, frame = cap.read()
         if frame is None:
@@ -181,9 +200,9 @@ def manage_students():
         batch = request.form['batch']
         student_id = request.form['student_id']
         student_name = request.form['student_name']
-        
+
         students_df = load_students(batch)
-        
+
         if student_id in students_df['Student ID'].values:
             flash("Student ID already exists.")
         else:
@@ -191,7 +210,7 @@ def manage_students():
             students_df = pd.concat([students_df, new_student], ignore_index=True)
             students_df.to_csv(get_student_data_file(batch), index=False)
             flash(f"Student {student_name} added to batch {batch}.")
-        
+
         return redirect(url_for('manage_students'))
 
     return render_template('manage_students.html', batches=BATCHES)
@@ -203,12 +222,12 @@ def manage_timetable():
         subject_name = request.form['subject_name']
         start_time = request.form['start_time']
         end_time = request.form['end_time']
-        
+
         timetable_df = load_timetable(batch)
-        
+
         new_entry = pd.DataFrame({'Subject Name': [subject_name], 'Start Time': [start_time], 'End Time': [end_time]})
         timetable_df = pd.concat([timetable_df, new_entry], ignore_index=True)
-        
+
         timetable_df.to_csv(get_timetable_file(batch), index=False)
         flash(f"Timetable updated for batch {batch}.")
         return redirect(url_for('manage_timetable'))
@@ -219,13 +238,12 @@ def periodically_generate_qr_codes(batch):
     students_df = load_students(batch)
     for _, student in students_df.iterrows():
         generate_qr_code(student['Student ID'], student['Name'], student['Batch'])
+    print(f"Periodically generated QR codes for batch {batch}.")
     
     # Schedule the next generation in the future
-    Timer(60, periodically_generate_qr_codes, [batch]).start()
-
+    Timer(60 * 5, periodically_generate_qr_codes, [batch]).start()
 # Call this function to start periodic QR code generation for each batch
 for batch in BATCHES:
     periodically_generate_qr_codes(batch)
-
 if __name__ == '__main__':
     app.run(debug=True)
